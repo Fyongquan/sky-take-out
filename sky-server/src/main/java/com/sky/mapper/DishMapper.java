@@ -37,6 +37,11 @@ public interface DishMapper {
     @AutoFill(value = OperationType.INSERT)
     void insert(Dish dish);
 
+    /**
+     * 根据id查询菜品
+     * @param id
+     * @return
+     */
     @Select("select * from dish where id = #{id}")
     Dish getById(Long id);
 
@@ -45,4 +50,11 @@ public interface DishMapper {
      * @param ids
      */
     void deleteBatch(List<Long> ids);
+
+    /**
+     * 更新菜品表
+     * @param dish
+     */
+    @AutoFill(value = OperationType.UPDATE)
+    void update(Dish dish);
 }
