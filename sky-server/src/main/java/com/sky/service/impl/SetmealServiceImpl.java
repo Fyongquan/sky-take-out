@@ -2,17 +2,23 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.DishFlavor;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.CategoryMapper;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
 import com.sky.vo.SetmealVO;
+import org.apache.xmlbeans.impl.jam.mutable.MClass;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,10 +39,14 @@ public class SetmealServiceImpl implements SetmealService {
     @Autowired
     private CategoryMapper categoryMapper;
 
+    @Autowired
+    private DishMapper dishMapper;
+
     /**
      * 新增套餐
      * @param setmealDTO
      */
+    @Transactional
     public void saveWithSetmealDishes(SetmealDTO setmealDTO ){
 
         //向套餐表插入1条数据
@@ -55,7 +65,7 @@ public class SetmealServiceImpl implements SetmealService {
             setmealDishes.forEach(setmealDish -> {
                 setmealDish.setSetmealId(setmealId);
             });
-            //向口味表插入n条数据
+            //向套餐菜品表插入n条数据
             setmealDishMapper.insertBatch(setmealDishes);
         }
     }
@@ -122,5 +132,51 @@ public class SetmealServiceImpl implements SetmealService {
             setmealDish.setSetmealId(setmealDTO.getId());
         });
         setmealDishMapper.insertBatch(setmealDishes);
+    }
+
+    /**
+     * 套餐起售和停售
+     * @param status
+     * @param id
+     */
+    public void changeStatus(Integer status, Long id){
+
+        //如果套餐需要起售则需要套餐内菜品都处于起售状态
+        if(status == StatusConstant.ENABLE) {
+            List<SetmealDish> setmealDishes = setmealDishMapper.getBySetmealId(id);
+            for (SetmealDish setmealDish : setmealDishes) {
+                Integer dishStatus = dishMapper.getStatusById(setmealDish.getDishId());
+                if (dishStatus == StatusConstant.DISABLE) {
+                    throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                }
+            }
+        }
+
+        Setmeal setmeal = Setmeal.builder()
+                .id(id)
+                .status(status)
+                .build();
+
+        setmealMapper.update(setmeal);
+    }
+
+    /**
+     * 批量删除套餐
+     * @param ids
+     */
+    @Transactional
+    public void deleteBatch(List<Long> ids){
+
+        for(Long id : ids){
+            Setmeal setmeal = setmealMapper.getById(id);
+            if(setmeal.getStatus() == StatusConstant.ENABLE){
+                //起售中的套餐无法删除
+                throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+            }
+        }
+
+        setmealMapper.deleteBatch(ids);
+
+        setmealDishMapper.deleteBatchBySetmealIds(ids);
     }
 }

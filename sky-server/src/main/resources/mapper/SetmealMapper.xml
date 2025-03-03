@@ -6,7 +6,7 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into setmeal (category_id, name, price, description, image, create_time, update_time, create_user, update_user)
             values
-        (#{category_id},#{name},#{price},#{description},#{image},#{create_time},#{update_time},#{create_user},#{update_user})
+        (#{categoryId},#{name},#{price},#{description},#{image},#{createTime},#{updateTime},#{createUser},#{updateUser})
     </insert>
     <select id="pageQuery" resultType="com.sky.vo.SetmealVO">
         select s.id, s.category_id, s.name, s.price, s.status, s.description, s.image, s.update_time, c.name as category_name from setmeal s left outer join category c on s.category_id = c.id
@@ -57,4 +57,10 @@
         </set>
         where id = #{id}
     </update>
+    <delete id="deleteBatch">
+        delete from setmeal where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>
