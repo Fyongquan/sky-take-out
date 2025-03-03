@@ -61,4 +61,12 @@ public interface CategoryMapper {
      */
     @Select("select c.name from dish d inner join category c on d.category_id = c.id where d.id = #{dishId}")
     String getNameByDishId(Long dishId);
+
+    /**
+     * 根据categoryId查询categoryName
+     * @param categoryId
+     * @return
+     */
+    @Select("select c.name from category c where c.id = #{categoryId}")
+    String getNameByCategoryId(Long categoryId);
 }
