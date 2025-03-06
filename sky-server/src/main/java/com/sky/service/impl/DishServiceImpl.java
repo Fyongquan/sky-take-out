@@ -144,7 +144,7 @@ public class DishServiceImpl implements DishService {
         List<DishFlavor> dishFlavor = dishFlavorMapper.getByDishId(id);
 
         //根据category_id查询分类名称
-        String categoryName = categoryMapper.getNameByDishId(id);
+        String categoryName = categoryMapper.getNameByCategoryId(dish.getCategoryId());
 
         DishVO dishVO = new DishVO();
         BeanUtils.copyProperties(dish,dishVO);
@@ -196,5 +196,35 @@ public class DishServiceImpl implements DishService {
         List<DishVO> dishVOs = dishMapper.getByCategoryId(categoryId);
 
         return dishVOs;
+    }
+
+    /**
+     * 根据id查询菜品
+     * @param categoryId
+     * @return
+     */
+    public List<DishVO> getDishesWithFlavorByCategoryIdWithFlavor(Long categoryId){
+
+        List<DishVO> dishVOes = new ArrayList<>();
+
+        //根据分类id查询全部菜品
+        List<Dish> dishes = dishMapper.getDishesBycategoryId(categoryId);
+
+        for(Dish dish : dishes){
+            //根据dish_id查询口味List
+            List<DishFlavor> dishFlavor = dishFlavorMapper.getByDishId(dish.getId());
+
+            //根据category_id查询分类名称
+            String categoryName = categoryMapper.getNameByCategoryId(categoryId);
+
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(dish,dishVO);
+            dishVO.setFlavors(dishFlavor);
+            dishVO.setCategoryName(categoryName);
+
+            dishVOes.add(dishVO);
+        }
+
+        return dishVOes;
     }
 }

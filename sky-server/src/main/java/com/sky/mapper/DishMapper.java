@@ -73,4 +73,12 @@ public interface DishMapper {
      */
     @Select("select status from dish where id = #{id}")
     Integer getStatusById(Long id);
+
+    /**
+     * 根据分类id查询全部菜品
+     * @param categoryId
+     * @return
+     */
+    @Select("select * from dish where category_id = #{categoryId}")
+    List<Dish> getDishesBycategoryId(Long categoryId);
 }
