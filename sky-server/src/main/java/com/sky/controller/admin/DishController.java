@@ -13,9 +13,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/dish")
@@ -27,6 +29,8 @@ public class DishController {
     private DishService dishService;
     @Autowired
     private JwtProperties jwtProperties;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 菜品分页查询
@@ -55,6 +59,10 @@ public class DishController {
 
         dishService.saveWithFlavor(dishDTO);
 
+        //清理缓存数据,根据category_Id
+        String key = "dish_" + dishDTO.getCategoryId();
+        cleanCache(key);
+
         return Result.success();
     }
 
@@ -70,6 +78,9 @@ public class DishController {
 
         dishService.deleteBatch(ids);
 
+        //清理全部缓存数据,以dish_开头的key
+        cleanCache("dish_*");
+
         return Result.success();
     }
 
@@ -81,9 +92,12 @@ public class DishController {
     @PostMapping("status/{status}")
     @ApiOperation("起售停售菜品")
     public Result changeStatus(@PathVariable Integer status, Long id){
-        log.info("起售停售菜品:{}",status);
+        log.info("起售停售菜品:{},{}",status,id);
 
         dishService.changeStatus(status,id);
+
+        //清理全部缓存数据,以dish_开头的key
+        cleanCache("dish_*");
 
         return Result.success();
     }
@@ -115,6 +129,9 @@ public class DishController {
 
         dishService.updateWithFlavor(dishDTO);
 
+        //清理全部缓存数据,以dish_开头的key
+        cleanCache("dish_*");
+
         return Result.success();
     }
 
@@ -131,5 +148,10 @@ public class DishController {
         List<DishVO> dishVOs = dishService.getByCategoryId(categoryId);
 
         return Result.success(dishVOs);
+    }
+
+    private void cleanCache(String pattern){
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
     }
 }

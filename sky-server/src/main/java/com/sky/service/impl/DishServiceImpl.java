@@ -4,7 +4,6 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
-import com.sky.dto.CategoryDTO;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
@@ -207,8 +206,12 @@ public class DishServiceImpl implements DishService {
 
         List<DishVO> dishVOes = new ArrayList<>();
 
+        Dish dish1 = new Dish();
+        dish1.setCategoryId(categoryId);
+        dish1.setStatus(StatusConstant.ENABLE);
+
         //根据分类id查询全部菜品
-        List<Dish> dishes = dishMapper.getDishesBycategoryId(categoryId);
+        List<Dish> dishes = dishMapper.getDishesBycategoryId(dish1);
 
         for(Dish dish : dishes){
             //根据dish_id查询口味List

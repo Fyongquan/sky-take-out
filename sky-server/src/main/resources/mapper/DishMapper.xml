@@ -58,4 +58,19 @@
         </set>
         where id = #{id}
     </update>
+    <!--  之后根据需要增加if  -->
+    <select id="getDishesBycategoryId" resultType="com.sky.entity.Dish">
+        select * from dish
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="name != null">
+                and name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
 </mapper>

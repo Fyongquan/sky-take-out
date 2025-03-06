@@ -63,4 +63,19 @@
             #{id}
         </foreach>
     </delete>
+    <!--  之后根据需要增加if  -->
+    <select id="getSetmealsByCategoryId" resultType="com.sky.entity.Setmeal">
+        select * from setmeal
+        <where>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="name != null">
+                and name = #{name}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
 </mapper>
