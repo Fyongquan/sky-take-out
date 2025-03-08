@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class OrdersSubmitDTO implements Serializable {
     //地址簿id
     private Long addressBookId;
-    //付款方式
+    //支付方式
     private int payMethod;
     //备注
     private String remark;
@@ -26,6 +26,6 @@ public class OrdersSubmitDTO implements Serializable {
     private Integer tablewareStatus;
     //打包费
     private Integer packAmount;
-    //总金额
+    //总金额（菜品+其他）
     private BigDecimal amount;
 }
