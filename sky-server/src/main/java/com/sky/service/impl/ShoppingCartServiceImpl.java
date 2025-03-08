@@ -11,6 +11,7 @@ import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.service.ShoppingCartService;
+import org.apache.poi.ss.formula.functions.BaseNumberUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,5 +69,52 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             shoppingCart.setCreateTime(LocalDateTime.now());
             shoppingCartMapper.addShoppingCart(shoppingCart);
         }
+    }
+
+    /**
+     * 查看购物车
+     * @return
+     */
+    public List<ShoppingCart> list(){
+
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+
+        List<ShoppingCart> carts = shoppingCartMapper.getByShoppingCart(shoppingCart);
+
+        return carts;
+    }
+
+    /**
+     * 删除购物车中的一个商品
+     * @param shoppingCartDTO
+     */
+    public void sub(ShoppingCartDTO shoppingCartDTO){
+        //判断当前加入到购物车中的商品是否已经存在
+        ShoppingCart shoppingCart = new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO,shoppingCart);
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+        List<ShoppingCart> list = shoppingCartMapper.getByShoppingCart(shoppingCart);
+
+        if(list != null && list.size() > 0){
+            ShoppingCart cart = list.get(0);
+            //如果数量是1，直接删除购物车中的商品
+            if(cart.getNumber() == 1){
+                shoppingCartMapper.deleteById(cart);
+            }//否则数量减1
+            else{
+                cart.setNumber(cart.getNumber() - 1);
+                shoppingCartMapper.updateNumberById(cart);
+            }
+
+        }
+    }
+
+    /**
+     * 清空购物车中的商品
+     */
+    public void clean(){
+
+        shoppingCartMapper.deleteByUserId(BaseContext.getCurrentId());
     }
 }
