@@ -81,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
         orders.setPhone(addressBook.getPhone());
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);
+        orders.setAddress(addressBook.getDetail());
 
         orderMapper.insert(orders);
 
@@ -167,4 +168,106 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(orders);
     }
 
+    /**
+     * 查询历史订单
+     * @param page
+     * @param pageSize
+     * @param status
+     * @return
+     */
+    public PageResult getHistoryOrders(int page, int pageSize, Integer status){
+
+        PageHelper.startPage(page,pageSize);
+
+        OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
+        ordersPageQueryDTO.setPageSize(pageSize);
+        ordersPageQueryDTO.setPage(page);
+        ordersPageQueryDTO.setStatus(status);
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+
+        Page<Orders> pages = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        List<OrderVO> list = new ArrayList<>();
+
+        if(pages != null && pages.size() > 0){
+            for(Orders order : pages){
+
+                Long orderId = order.getId();
+                List<OrderDetail> orderDetails = orderDetailMapper.getAllByOrderId(orderId);
+
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(order,orderVO);
+                orderVO.setOrderDetailList(orderDetails);
+
+                list.add(orderVO);
+            }
+        }
+
+
+        return new PageResult(pages.getTotal(),list);
+    }
+
+    /**
+     * 查询订单详情
+     * @param id
+     * @return
+     */
+    public OrderVO getOrderDetailByOrderId(Long id){
+
+        OrderVO orderVO = new OrderVO();
+
+        Orders order = orderMapper.getById(id);
+        List<OrderDetail> orderDetail = orderDetailMapper.getAllByOrderId(id);
+
+        BeanUtils.copyProperties(order,orderVO);
+        orderVO.setOrderDetailList(orderDetail);
+
+        return orderVO;
+    }
+
+    /**
+     * 取消订单
+     * @param id
+     */
+    public void cancel(Long id){
+
+        Orders order = orderMapper.getById(id);
+
+        if(order == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        //订单状态是待支付和待接单状态才可以被直接取消订单
+        if(order.getStatus() > 2){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        //更新订单数据
+        order.setPayStatus(Orders.REFUND);
+        order.setStatus(Orders.CANCELLED);
+        order.setCancelReason("用户取消");
+        order.setCancelTime(LocalDateTime.now());
+        orderMapper.update(order);
+
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    public void repetition(Long id){
+
+        List<OrderDetail> orderDetails = orderDetailMapper.getAllByOrderId(id);
+
+        List<ShoppingCart> shoppingCarts = new ArrayList<>();
+        for(OrderDetail od : orderDetails){
+            ShoppingCart sp = new ShoppingCart();
+            BeanUtils.copyProperties(od,sp);
+            sp.setCreateTime(LocalDateTime.now());
+            sp.setUserId(BaseContext.getCurrentId());
+            shoppingCarts.add(sp);
+        }
+
+        shoppingCartMapper.addBatchShoppingCart(shoppingCarts);
+    }
 }
