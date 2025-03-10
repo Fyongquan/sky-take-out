@@ -169,7 +169,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 查询历史订单
+     * 用户端查询历史订单
      * @param page
      * @param pageSize
      * @param status
@@ -208,7 +208,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 查询订单详情
+     * 用户端根据订单id查询订单详情
      * @param id
      * @return
      */
@@ -226,7 +226,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 取消订单
+     * 用户端取消订单
      * @param id
      */
     public void cancel(Long id){
@@ -270,4 +270,45 @@ public class OrderServiceImpl implements OrderService {
 
         shoppingCartMapper.addBatchShoppingCart(shoppingCarts);
     }
+
+    /**
+     * 商家端搜索订单
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO){
+
+        PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
+
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        List<Orders> orders = page.getResult();
+
+        // 部分订单状态，需要额外返回订单菜品信息，将Orders转化为OrderVO
+        List<OrderVO> orderVOS = new ArrayList<>();
+
+        for(Orders od : orders){
+            // 将共同字段复制到OrderVO
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(od,orderVO);
+
+            // 查询订单菜品详情信息（订单中的菜品和数量）
+            List<OrderDetail> orderDetails = orderDetailMapper.getAllByOrderId(od.getId());
+
+            // 将每一条订单菜品信息拼接为字符串（格式：宫保鸡丁*3；）
+            List<String> orderDishList = orderDetails.stream().map(x ->{
+                String orderDish = x.getName() + "*" + x.getNumber() + ";";
+                return orderDish;
+            }).collect(Collectors.toList());
+
+            // 将该订单对应的所有菜品信息拼接在一起
+            // 将订单菜品信息封装到orderVO中，并添加到orderVOList
+            orderVO.setOrderDishes(String.join("", orderDishList));
+            orderVOS.add(orderVO);
+        }
+
+
+        return new PageResult(page.getTotal(), orderVOS);
+    }
+
 }
