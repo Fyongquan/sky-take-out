@@ -579,4 +579,26 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         orderMapper.update(order);
     }
+
+    /**
+     * 用户端催单
+     * @param id
+     */
+    public void reminder(Long id){
+
+        String number = orderMapper.getNumberById(id);
+
+        if(number == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Map map = new HashMap<>();
+        map.put("type",2);
+        map.put("orderId",id);
+        map.put("content",number);
+
+        String jsonString = JSON.toJSONString(map);
+
+        webSocketServer.sendToAllClient(jsonString);
+    }
 }
