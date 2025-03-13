@@ -2,6 +2,7 @@ package com.sky.mapper;
 
 import com.github.pagehelper.Page;
 import com.sky.dto.OrdersPageQueryDTO;
+import com.sky.entity.OrderMoneyAndDate;
 import com.sky.entity.Orders;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderVO;
@@ -71,4 +72,13 @@ public interface OrderMapper {
      */
     @Select("select number from orders where id = #{id}")
     String getNumberById(Long id);
+
+    /**
+     * 根据开始和结束时间获取订单的营业额和下单时间
+     * @param begin
+     * @param end
+     * @return
+     */
+    @Select("select amount, order_time from orders where order_time >= #{begin}  and order_time < #{end}")
+    List<OrderMoneyAndDate> getMoneyAndDate(String begin, String end);
 }
