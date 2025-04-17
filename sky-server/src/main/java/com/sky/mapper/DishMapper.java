@@ -6,6 +6,7 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.enumeration.OperationType;
 import com.sky.vo.DishVO;
+import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -66,7 +67,7 @@ public interface DishMapper {
     List<DishVO> getByCategoryId(Long categoryId);
 
     /**
-     * 根据id获取状态
+     * 根据id获取菜品状态
      * @param id
      * @return
      */
@@ -79,4 +80,12 @@ public interface DishMapper {
      * @return
      */
     List<Dish> getDishesBycategoryId(Dish dish);
+
+    /**
+     * 根据菜品状态，获取对应的菜品数量
+     * @param status
+     * @return
+     */
+    @Select("select COUNT(id) from dish where status = #{status}")
+    Integer getCountByStatus(Integer status);
 }

@@ -19,7 +19,7 @@
     </modules>
     <properties>
         <mybatis.spring>2.2.0</mybatis.spring>
-        <lombok>1.18.20</lombok>
+        <lombok>1.18.24</lombok>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
         <druid>1.2.1</druid>
@@ -122,6 +122,37 @@
                 <artifactId>wechatpay-apache-httpclient</artifactId>
                 <version>0.4.8</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.ulisesbocchio</groupId>
+                <artifactId>jasypt-spring-boot-starter</artifactId>
+                <version>3.0.3</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+    <!-- 在父 POM 的 pluginManagement 中添加（需补充到父POM中） -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.10.1</version>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.ulisesbocchio</groupId>
+                    <artifactId>jasypt-maven-plugin</artifactId>
+                    <version>3.0.3</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

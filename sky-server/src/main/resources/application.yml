@@ -55,15 +55,14 @@ sky:
   wechat:
     appid: ${sky.wechat.appid}
     secret: ${sky.wechat.secret}
-#    mchid:
-#    mch-serial-no:
-#    private-key-file-path:
-#    api-v3-key:
-#    we-chat-pay-cert-file-path:
-#    notify-url:
-#    refund-notify-url:
+  #    mchid:
+  #    mch-serial-no:
+  #    private-key-file-path:
+  #    api-v3-key:
+  #    we-chat-pay-cert-file-path:
+  #    notify-url:
+  #    refund-notify-url:
   shop:
     address: 浙江省宁波市鄞州区钱湖南路1号
   baidu:
     ak: lCeSADMhXKQuByDeFmNRv5jkxjw49cFt
-

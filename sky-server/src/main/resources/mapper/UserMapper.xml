@@ -7,4 +7,11 @@
         insert into user (openid, name, phone, sex, id_number, avatar, create_time)
         values (#{openid},#{name},#{phone},#{sex},#{idNumber},#{avatar},#{createTime})
     </insert>
+    <insert id="insertBatch">
+        insert into user (openid, create_time)
+        values
+        <foreach collection="users" item="user" separator=",">
+            (#{user.openid},#{user.createTime})
+        </foreach>
+    </insert>
 </mapper>
